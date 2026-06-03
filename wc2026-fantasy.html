@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC2026 Fantasy League</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #F5B731;
+    --gold2: #E8A020;
+    --red: #E63946;
+    --dark: #0A0C10;
+    --panel: #11141A;
+    --panel2: #181C24;
+    --border: #2A2F3C;
+    --text: #E8EAF0;
+    --muted: #6B7280;
+    --green: #22C55E;
+    --blue: #3B82F6;
+    --pitch: #1A5C2A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, #0A0C10 0%, #111827 50%, #0A0C10 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 0 2rem;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo-ball {
+    width: 38px; height: 38px;
+    background: radial-gradient(circle at 35% 35%, #fff 0%, #ccc 100%);
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 16px rgba(245,183,49,0.4);
+    flex-shrink: 0;
+  }
+  .logo-ball::before {
+    content:'';
+    position:absolute; inset:0;
+    background: repeating-conic-gradient(#000 0deg 60deg, transparent 60deg 120deg) 0 0 / 20px 20px;
+    opacity: 0.15;
+    border-radius: 50%;
+  }
+  .logo h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .logo span { color: #fff; }
+
+  nav { display: flex; gap: 4px; }
+  nav button {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px; border-radius: 6px;
+    transition: all 0.2s;
+  }
+  nav button:hover { color: var(--text); background: var(--panel2); }
+  nav button.active {
+    color: var(--gold);
+    background: rgba(245,183,49,0.12);
+    border-bottom: 2px solid var(--gold);
+    border-radius: 6px 6px 0 0;
+  }
+
+  /* ─── PAGES ──────────────────────────────── */
+  .page { display: none; padding: 2rem; max-width: 1400px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ─── PAGE HERO BANNERS ──────────────────── */
+  .page-hero {
+    background: linear-gradient(135deg, var(--panel) 0%, var(--panel2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .page-hero::before {
+    content: '';
+    position: absolute; right: -40px; top: -40px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(245,183,49,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .page-hero h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem; letter-spacing: 3px;
+    color: var(--gold); line-height: 1;
+  }
+  .page-hero p { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
+  .hero-badge {
+    background: rgba(245,183,49,0.15);
+    border: 1px solid rgba(245,183,49,0.3);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 1px;
+    color: var(--gold); text-transform: uppercase;
+  }
+
+  /* ─── DASHBOARD ──────────────────────────── */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--gold); }
+  .stat-card .label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .stat-card .value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem; color: var(--gold); line-height: 1;
+  }
+  .stat-card .sub { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+  /* Leaderboard */
+  .leaderboard {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .leaderboard-header {
+    background: var(--panel2);
+    padding: 1rem 1.5rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem; letter-spacing: 2px;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 80px 80px 80px;
+    align-items: center;
+    padding: 12px 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row:hover { background: var(--panel2); }
+  .lb-row.top1 { background: rgba(245,183,49,0.07); }
+  .lb-row.top2 { background: rgba(200,200,200,0.04); }
+  .lb-row.top3 { background: rgba(180,100,50,0.05); }
+  .rank {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem; color: var(--muted);
+    text-align: center;
+  }
+  .rank.r1 { color: var(--gold); }
+  .rank.r2 { color: #C0C0C0; }
+  .rank.r3 { color: #CD7F32; }
+  .player-name { font-weight: 600; font-size: 0.95rem; }
+  .pts {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem; color: var(--gold);
+    text-align: center;
+  }
+  .lb-correct { text-align: center; color: var(--green); font-size: 0.85rem; font-weight: 600; }
+  .lb-total { text-align: center; color: var(--muted); font-size: 0.85rem; }
+
+  /* Match Results Grid */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem; letter-spacing: 2px;
+    color: var(--gold); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title span { color: var(--muted); font-size: 0.8rem; font-family: 'Barlow Condensed'; letter-spacing: 1px; text-transform: uppercase; }
+
+  .results-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .match-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .match-card:hover { transform: translateY(-2px); border-color: rgba(245,183,49,0.4); }
+  .match-card-head {
+    background: var(--panel2);
+    padding: 8px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 1px;
+    color: var(--muted); text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .match-card-head .status {
+    padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .status.completed { background: rgba(34,197,94,0.15); color: var(--green); }
+  .status.upcoming { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .status.live { background: rgba(230,57,70,0.2); color: var(--red);
+    animation: pulseLive 1.5s infinite; }
+  @keyframes pulseLive {
+    0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+  }
+  .match-teams {
+    padding: 16px 14px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .team-side { text-align: center; flex: 1; }
+  .team-flag { font-size: 1.8rem; display: block; line-height: 1; margin-bottom: 4px; }
+  .team-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; }
+  .team-name.winner { color: var(--green); }
+  .score-box {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    text-align: center; min-width: 64px;
+  }
+  .score-box .score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; color: var(--text); line-height: 1;
+  }
+  .score-box .score-label {
+    font-size: 0.6rem; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .match-picks-count {
+    padding: 8px 14px;
+    font-size: 0.75rem; color: var(--muted);
+    border-top: 1px solid var(--border);
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .pick-stat { display: flex; align-items: center; gap: 5px; }
+  .pick-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .pick-dot.green { background: var(--green); }
+  .pick-dot.red { background: var(--red); }
+
+  /* ─── PICKS INTERFACE ────────────────────── */
+  .participants-bar {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
+  }
+  .form-group { flex: 1; min-width: 180px; }
+  .form-group label {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    color: var(--text); font-family: 'Barlow', sans-serif; font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--gold);
+  }
+  .btn {
+    padding: 10px 22px; border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer; border: none;
+    transition: all 0.2s;
+  }
+  .btn-gold {
+    background: var(--gold); color: #000;
+  }
+  .btn-gold:hover { background: var(--gold2); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent; color: var(--gold);
+    border: 1px solid var(--gold);
+  }
+  .btn-ghost:hover { background: rgba(245,183,49,0.1); }
+
+  /* Group tabs */
+  .group-tabs {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem;
+  }
+  .group-tab {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 1px;
+    color: var(--muted); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .group-tab:hover { border-color: var(--gold); color: var(--text); }
+  .group-tab.active { background: rgba(245,183,49,0.12); border-color: var(--gold); color: var(--gold); }
+
+  /* Picks Match Card */
+  .picks-grid { display: flex; flex-direction: column; gap: 12px; }
+  .pick-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .pick-card-head {
+    background: var(--panel2);
+    padding: 8px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 1px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .pick-card-body {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .team-pick-btn {
+    flex: 1; padding: 14px 10px;
+    background: var(--panel2); border: 2px solid var(--border);
+    border-radius: 10px; cursor: pointer;
+    text-align: center; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .team-pick-btn:hover {
+    border-color: rgba(245,183,49,0.5);
+    background: rgba(245,183,49,0.05);
+  }
+  .team-pick-btn.selected {
+    border-color: var(--gold);
+    background: rgba(245,183,49,0.1);
+  }
+  .team-pick-btn.selected-draw {
+    border-color: var(--blue);
+    background: rgba(59,130,246,0.1);
+  }
+  .team-pick-btn .flag { font-size: 2rem; }
+  .team-pick-btn .tname {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px;
+    color: var(--text);
+  }
+  .vs-div {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; color: var(--muted);
+    flex-shrink: 0;
+  }
+  .draw-btn {
+    flex-shrink: 0;
+    background: var(--panel2); border: 2px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 1px; color: var(--muted);
+    cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+  }
+  .draw-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .draw-btn.selected-draw { border-color: var(--blue); color: var(--blue); background: rgba(59,130,246,0.1); }
+
+  /* ─── ADMIN PANEL ────────────────────────── */
+  .admin-match-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .admin-match-head {
+    background: var(--panel2);
+    padding: 10px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 1px; color: var(--muted); text-transform: uppercase;
+  }
+  .admin-match-body {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .team-result-btn {
+    flex: 1; min-width: 120px; padding: 12px 8px;
+    background: var(--panel2); border: 2px solid var(--border);
+    border-radius: 10px; cursor: pointer;
+    text-align: center; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .team-result-btn:hover { border-color: rgba(34,197,94,0.5); }
+  .team-result-btn.winner-set { border-color: var(--green); background: rgba(34,197,94,0.1); }
+  .team-result-btn.draw-set { border-color: var(--blue); background: rgba(59,130,246,0.1); }
+  .team-result-btn .flag { font-size: 1.8rem; }
+  .team-result-btn .tname {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px;
+  }
+  .score-input-row {
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .score-input {
+    width: 52px; padding: 8px 6px;
+    background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    text-align: center; outline: none; transition: border-color 0.2s;
+  }
+  .score-input:focus { border-color: var(--gold); }
+  .score-sep {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem; color: var(--muted);
+  }
+  .admin-save-btn {
+    padding: 9px 18px; border-radius: 8px;
+    background: var(--green); border: none;
+    color: #000; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .admin-save-btn:hover { opacity: 0.85; }
+
+  /* Notifications */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--panel2); border: 1px solid var(--green);
+    border-radius: 10px; padding: 12px 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem; font-weight: 600; letter-spacing: 0.5px;
+    color: var(--green); z-index: 999;
+    transform: translateY(60px); opacity: 0;
+    transition: all 0.3s;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Table */
+  .data-table {
+    width: 100%; border-collapse: collapse;
+  }
+  .data-table th {
+    background: var(--panel2);
+    padding: 10px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .data-table td {
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    border-bottom: 1px solid rgba(42,47,60,0.6);
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ─── RESPONSIVE ─────────────────────────── */
+  @media (max-width: 700px) {
+    .page { padding: 1rem; }
+    .lb-row { grid-template-columns: 36px 1fr 60px; }
+    .lb-correct, .lb-total { display: none; }
+    .pick-card-body { flex-wrap: wrap; }
+  }
+
+  /* ─── MISC ───────────────────────────────── */
+  .empty-state {
+    text-align: center; padding: 3rem 1rem;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; letter-spacing: 1px;
+  }
+  .empty-state .emoji { font-size: 2.5rem; margin-bottom: 12px; }
+  .pill {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .pill-gold { background: rgba(245,183,49,0.15); color: var(--gold); }
+  .pill-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .pill-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .pill-red { background: rgba(230,57,70,0.15); color: var(--red); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .scrollable { max-height: 500px; overflow-y: auto; }
+  .scrollable::-webkit-scrollbar { width: 4px; }
+  .scrollable::-webkit-scrollbar-track { background: transparent; }
+  .scrollable::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ─── HISTORY LOG ────────────────────────── */
+  .log-feed { display: flex; flex-direction: column; gap: 6px; }
+  .log-entry {
+    display: grid;
+    grid-template-columns: 148px 100px 1fr auto;
+    align-items: center; gap: 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: 10px;
+    padding: 10px 16px;
+    transition: border-color 0.15s;
+    animation: slideIn 0.2s ease;
+  }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
+  .log-entry:hover { border-color: rgba(245,183,49,0.3); }
+  .log-entry.lt-pick   { border-left-color: var(--gold); }
+  .log-entry.lt-change { border-left-color: #f97316; }
+  .log-entry.lt-result { border-left-color: var(--green); }
+  .log-entry.lt-admin  { border-left-color: #a78bfa; }
+  .log-entry.lt-rename { border-left-color: var(--blue); }
+  .log-entry.lt-remove { border-left-color: var(--red); }
+  .log-time  { font-size: 0.72rem; color: var(--muted); font-family:'Barlow Condensed'; letter-spacing: 0.5px; line-height:1.4; }
+  .log-actor { font-weight: 700; font-size: 0.88rem; color: var(--text); }
+  .log-msg   { font-size: 0.85rem; color: var(--text); line-height: 1.4; }
+  .log-msg em  { font-style: normal; color: var(--gold); font-weight: 600; }
+  .log-msg del { color: var(--muted); font-size: 0.78rem; }
+  .log-badge { font-family:'Barlow Condensed'; font-size:0.68rem; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase;
+    padding:2px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
+  .lb-pick   { background:rgba(245,183,49,0.12); color:var(--gold); }
+  .lb-change { background:rgba(249,115,22,0.12); color:#f97316; }
+  .lb-result { background:rgba(34,197,94,0.12);  color:var(--green); }
+  .lb-admin  { background:rgba(139,92,246,0.12); color:#a78bfa; }
+  .lb-rename { background:rgba(59,130,246,0.12); color:var(--blue); }
+  .lb-remove { background:rgba(230,57,70,0.12);  color:var(--red); }
+  .log-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1.25rem; align-items:center; }
+  .log-filter-btn {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:20px; padding:5px 14px;
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:0.75rem; font-weight:700; letter-spacing:1px;
+    color:var(--muted); cursor:pointer; transition:all 0.15s; text-transform:uppercase;
+  }
+  .log-filter-btn:hover { border-color:var(--gold); color:var(--text); }
+  .log-filter-btn.active { background:rgba(245,183,49,0.12); border-color:var(--gold); color:var(--gold); }
+  .log-search {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:20px; padding:5px 16px;
+    color:var(--text); font-family:'Barlow',sans-serif; font-size:0.82rem;
+    outline:none; transition:border-color 0.2s; min-width:200px; margin-left:auto;
+  }
+  .log-search:focus { border-color:var(--gold); }
+  .log-stat-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+  .log-stat {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:10px 20px; text-align:center; min-width:100px;
+  }
+  .log-stat .v { font-family:'Bebas Neue',sans-serif; font-size:2rem; line-height:1; }
+  .log-stat .l { font-size:0.68rem; color:var(--muted); font-family:'Barlow Condensed'; letter-spacing:1px; text-transform:uppercase; margin-top:3px; }
+  @media (max-width:700px) {
+    .log-entry { grid-template-columns: 1fr auto; }
+    .log-time, .log-actor { display:none; }
+  }
+
+  /* ─── PIN LOGIN MODAL ────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .modal-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    width: 100%; max-width: 380px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from { opacity:0; transform:scale(0.88); } to { opacity:1; transform:scale(1); } }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem; letter-spacing: 3px;
+    color: var(--gold); text-align: center; margin-bottom: 4px;
+  }
+  .modal-sub { text-align:center; color:var(--muted); font-size:0.85rem; margin-bottom:2rem; }
+  .pin-dots {
+    display: flex; justify-content: center; gap: 12px; margin-bottom: 1.5rem;
+  }
+  .pin-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--border); transition: all 0.15s;
+  }
+  .pin-dot.filled { background: var(--gold); box-shadow: 0 0 8px rgba(245,183,49,0.5); }
+  .pin-dot.error  { background: var(--red); box-shadow: 0 0 8px rgba(230,57,70,0.5); }
+  .pin-pad {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-bottom: 1rem;
+  }
+  .pin-btn {
+    background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 8px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem;
+    color: var(--text); cursor: pointer;
+    transition: all 0.12s; text-align: center; user-select: none;
+  }
+  .pin-btn:hover { background: rgba(245,183,49,0.1); border-color: var(--gold); color: var(--gold); }
+  .pin-btn:active { transform: scale(0.94); }
+  .pin-btn.wide { grid-column: span 2; font-size: 0.85rem;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; font-weight: 700; }
+  .pin-btn.clear-btn { color: var(--red); border-color: rgba(230,57,70,0.3); }
+  .pin-error-msg {
+    text-align:center; color:var(--red);
+    font-family:'Barlow Condensed'; letter-spacing:1px; font-size:0.82rem;
+    min-height:20px; margin-bottom:0.5rem;
+  }
+  .player-select-list {
+    display:flex; flex-direction:column; gap:8px; margin-bottom:1rem; max-height:240px; overflow-y:auto;
+  }
+  .player-select-item {
+    background:var(--panel2); border:1px solid var(--border);
+    border-radius:10px; padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; transition:all 0.15s;
+  }
+  .player-select-item:hover { border-color:var(--gold); background:rgba(245,183,49,0.06); }
+  .player-select-item .pname { font-weight:700; font-size:0.95rem; }
+  .player-select-item .ppin-hint {
+    font-family:'Barlow Condensed'; font-size:0.72rem; letter-spacing:1px;
+    color:var(--muted); text-transform:uppercase;
+  }
+  .player-select-item.no-pin .ppin-hint { color:var(--red); }
+
+  /* Session bar in header */
+  .session-bar {
+    display:flex; align-items:center; gap:10px;
+    background:rgba(245,183,49,0.08); border:1px solid rgba(245,183,49,0.2);
+    border-radius:8px; padding:5px 14px;
+    font-family:'Barlow Condensed'; font-size:0.8rem; letter-spacing:0.5px;
+  }
+  .session-bar .sname { color:var(--gold); font-weight:700; }
+  .session-bar .slogout {
+    background:none; border:none; color:var(--muted); cursor:pointer;
+    font-size:0.75rem; font-family:'Barlow Condensed'; letter-spacing:1px;
+    text-transform:uppercase; padding:2px 6px; border-radius:4px;
+    transition:color 0.15s;
+  }
+  .session-bar .slogout:hover { color:var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-ball"></div>
+    <h1><span>WC</span>2026 <span style="color:#fff">Fantasy</span></h1>
+  </div>
+  <nav>
+    <button class="active" onclick="showPage('dashboard')">⚡ Dashboard</button>
+    <button onclick="showPage('picks')">🎯 My Picks</button>
+    <button onclick="showPage('admin')">⚙️ Admin</button>
+    <button onclick="showPage('history')">📋 History</button>
+  </nav>
+  <div id="session-indicator" style="display:none"></div>
+</header>
+
+<!-- PIN Login Modal -->
+<div id="pin-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">Player Login</div>
+    <div class="modal-sub" id="pin-modal-sub">Select your name to continue</div>
+
+    <!-- Step 1: player list -->
+    <div id="pin-step-select">
+      <div class="player-select-list" id="pin-player-list"></div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="closePinModal()">Cancel</button>
+    </div>
+
+    <!-- Step 2: PIN entry -->
+    <div id="pin-step-enter" style="display:none">
+      <div style="text-align:center;margin-bottom:1rem">
+        <span style="font-size:1.6rem" id="pin-selected-flag"></span>
+        <div style="font-family:'Bebas Neue';font-size:1.3rem;color:var(--gold);letter-spacing:2px;margin-top:4px" id="pin-selected-name"></div>
+      </div>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-error-msg" id="pin-error"></div>
+      <div class="pin-pad">
+        <button class="pin-btn" onclick="pinKey('1')">1</button>
+        <button class="pin-btn" onclick="pinKey('2')">2</button>
+        <button class="pin-btn" onclick="pinKey('3')">3</button>
+        <button class="pin-btn" onclick="pinKey('4')">4</button>
+        <button class="pin-btn" onclick="pinKey('5')">5</button>
+        <button class="pin-btn" onclick="pinKey('6')">6</button>
+        <button class="pin-btn" onclick="pinKey('7')">7</button>
+        <button class="pin-btn" onclick="pinKey('8')">8</button>
+        <button class="pin-btn" onclick="pinKey('9')">9</button>
+        <button class="pin-btn clear-btn" onclick="pinClear()">⌫</button>
+        <button class="pin-btn" onclick="pinKey('0')">0</button>
+        <button class="pin-btn" onclick="pinBack()" style="font-size:0.9rem;font-family:'Barlow Condensed';letter-spacing:1px">Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-dashboard" class="page active">
+  <div class="page-hero">
+    <div>
+      <h2>2026 FIFA World Cup</h2>
+      <p>USA · Canada · Mexico &nbsp;|&nbsp; June 11 – July 19, 2026 &nbsp;|&nbsp; 48 Teams · 104 Matches</p>
+    </div>
+    <div class="hero-badge">Fantasy League</div>
+  </div>
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="two-col">
+    <div>
+      <div class="section-title">🏆 Leaderboard <span>Overall Rankings</span></div>
+      <div class="leaderboard">
+        <div class="leaderboard-header">⚽ Fantasy Standings</div>
+        <div id="leaderboard-body"></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">📅 Recent Results <span>Completed Matches</span></div>
+      <div id="recent-results"></div>
+    </div>
+  </div>
+
+  <div class="section-title">📊 All Group Stage Matches <span>Click to see picks</span></div>
+  <div class="results-grid" id="all-matches-grid"></div>
+</div>
+
+<div id="page-picks" class="page">
+  <div class="page-hero">
+    <div>
+      <h2>Submit Picks</h2>
+      <p>Log in with your PIN to submit and manage your picks</p>
+    </div>
+    <div class="hero-badge">2 pts per correct pick</div>
+  </div>
+
+  <!-- Not logged in -->
+  <div id="picks-login-wall" style="text-align:center;padding:3rem 1rem">
+    <div style="font-size:3rem;margin-bottom:14px">🔐</div>
+    <div style="font-family:'Bebas Neue';font-size:1.6rem;letter-spacing:3px;color:var(--gold);margin-bottom:8px">Player Login Required</div>
+    <div style="color:var(--muted);font-size:0.9rem;margin-bottom:2rem">Log in with your name and 4-digit PIN assigned by the admin</div>
+    <button class="btn btn-gold" style="font-size:1rem;padding:12px 32px" onclick="openPinModal()">🔑 Login</button>
+  </div>
+
+  <!-- Logged in -->
+  <div id="picks-logged-in" style="display:none">
+    <div class="participants-bar" style="align-items:center">
+      <div id="picks-player-badge"></div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ghost" onclick="clearPicksBuf()" id="btn-clear-picks">↺ Reset</button>
+        <button class="btn btn-gold" onclick="savePicks()">💾 Save Picks</button>
+      </div>
+    </div>
+    <div class="group-tabs" id="picks-group-tabs"></div>
+    <div class="picks-grid" id="picks-grid"></div>
+  </div>
+</div>
+
+<div id="page-admin" class="page">
+  <div class="page-hero">
+    <div>
+      <h2>Admin Panel</h2>
+      <p>Set match results — winners are calculated automatically</p>
+    </div>
+    <div class="hero-badge">Commissioner View</div>
+  </div>
+
+  <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+    <div class="form-group" style="max-width:200px">
+      <label>Admin Password</label>
+      <input type="password" id="admin-pw" placeholder="••••••••" />
+    </div>
+    <div style="align-self:flex-end">
+      <button class="btn btn-gold" onclick="unlockAdmin()">🔓 Unlock</button>
+    </div>
+  </div>
+
+  <div id="admin-locked" style="text-align:center;padding:3rem;color:var(--muted)">
+    <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+    <div style="font-family:'Barlow Condensed';letter-spacing:1px;text-transform:uppercase">Enter password to access admin tools</div>
+    <div style="font-size:0.8rem;margin-top:6px">Default password: <strong style="color:var(--gold)">wc2026</strong></div>
+  </div>
+
+  <div id="admin-panel" style="display:none">
+    <div class="group-tabs" id="admin-group-tabs"></div>
+    <div id="admin-matches-list"></div>
+    <div style="margin-top:2rem">
+      <div class="section-title">👥 Manage Participants</div>
+      <div class="participants-bar" style="flex-wrap:wrap;gap:0.75rem;align-items:flex-end">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="new-participant-name" placeholder="e.g. Prasenjit" />
+        </div>
+        <div class="form-group" style="max-width:120px">
+          <label>4-Digit PIN</label>
+          <input type="text" id="new-participant-pin" placeholder="e.g. 1234" maxlength="4"
+            style="letter-spacing:6px;font-family:'Bebas Neue';font-size:1.2rem;text-align:center"
+            oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" />
+        </div>
+        <div>
+          <button class="btn btn-gold" onclick="addParticipant()">+ Add Player</button>
+        </div>
+      </div>
+      <div class="leaderboard">
+        <div class="leaderboard-header">All Participants</div>
+        <div id="participants-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-history" class="page">
+  <div class="page-hero">
+    <div>
+      <h2>Change History</h2>
+      <p>Full audit log — every pick, change, result, and admin action</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="hero-badge" id="history-count-badge">0 events</div>
+      <button class="btn btn-ghost" onclick="clearHistory()" style="font-size:0.75rem;padding:7px 14px">🗑 Clear Log</button>
+    </div>
+  </div>
+
+  <div class="log-stat-row" id="history-stats"></div>
+
+  <div class="log-filters">
+    <button class="log-filter-btn active" onclick="setLogFilter('ALL',this)">All</button>
+    <button class="log-filter-btn" onclick="setLogFilter('pick',this)">🎯 Picks</button>
+    <button class="log-filter-btn" onclick="setLogFilter('change',this)">✏️ Changes</button>
+    <button class="log-filter-btn" onclick="setLogFilter('result',this)">⚽ Results</button>
+    <button class="log-filter-btn" onclick="setLogFilter('admin',this)">⚙️ Admin</button>
+    <button class="log-filter-btn" onclick="setLogFilter('rename',this)">👤 Renames</button>
+    <button class="log-filter-btn" onclick="setLogFilter('remove',this)">🗑 Removals</button>
+    <input class="log-search" id="log-search-input" type="text" placeholder="🔍  Search player, team, match…" oninput="renderHistoryPage()">
+  </div>
+
+  <div class="log-feed" id="history-feed"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA — 2026 FIFA World Cup Groups & Matches
+// ═══════════════════════════════════════════
+const GROUPS = {
+  A: { teams: ['Mexico','South Korea','South Africa','Czechia'],
+       flags: ['🇲🇽','🇰🇷','🇿🇦','🇨🇿'] },
+  B: { teams: ['Canada','Switzerland','Qatar','Bosnia-Herzegovina'],
+       flags: ['🇨🇦','🇨🇭','🇶🇦','🇧🇦'] },
+  C: { teams: ['Brazil','Morocco','Haiti','Scotland'],
+       flags: ['🇧🇷','🇲🇦','🇭🇹','🏴󠁧󠁢󠁳󠁣󠁴󠁿'] },
+  D: { teams: ['USA','Paraguay','Australia','Turkey'],
+       flags: ['🇺🇸','🇵🇾','🇦🇺','🇹🇷'] },
+  E: { teams: ['Germany','Colombia','Senegal','Japan'],
+       flags: ['🇩🇪','🇨🇴','🇸🇳','🇯🇵'] },
+  F: { teams: ['Spain','Cameroon','Belgium','Ukraine'],
+       flags: ['🇪🇸','🇨🇲','🇧🇪','🇺🇦'] },
+  G: { teams: ['Belgium','Egypt','Iran','New Zealand'],
+       flags: ['🇧🇪','🇪🇬','🇮🇷','🇳🇿'] },
+  H: { teams: ['Saudi Arabia','Uruguay','Spain','Cape Verde'],
+       flags: ['🇸🇦','🇺🇾','🇪🇸','🇨🇻'] },
+  I: { teams: ['Argentina','Chile','Albania','Nigeria'],
+       flags: ['🇦🇷','🇨🇱','🇦🇱','🇳🇬'] },
+  J: { teams: ['France','Portugal','Jordan','Uzbekistan'],
+       flags: ['🇫🇷','🇵🇹','🇯🇴','🇺🇿'] },
+  K: { teams: ['England','Netherlands','Panama','Curaçao'],
+       flags: ['🏴󠁧󠁢󠁥󠁮󠁧󠁿','🇳🇱','🇵🇦','🇨🇼'] },
+  L: { teams: ['Italy','Ecuador','Egypt','Ivory Coast'],
+       flags: ['🇮🇹','🇪🇨','🇪🇬','🇨🇮'] },
+};
+
+// Build matches (round-robin per group: pairs [0v1, 2v3, 0v2, 1v3, 0v3, 1v2])
+// kickoffEST: ISO string in America/New_York time (used for pick lock)
+function buildGroupMatches() {
+  const matches = [];
+  const pairs = [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]];
+
+  // Real 2026 WC group-stage schedule (EST). 6 matches per group, 12 groups.
+  // Format: [dateStr, timeEST] per slot — staggered through Jun 11–27
+  const schedule = {
+    A: [['2026-06-11','15:00'],['2026-06-11','22:00'],['2026-06-15','15:00'],['2026-06-15','18:00'],['2026-06-19','15:00'],['2026-06-19','15:00']],
+    B: [['2026-06-12','15:00'],['2026-06-12','18:00'],['2026-06-16','12:00'],['2026-06-16','15:00'],['2026-06-20','15:00'],['2026-06-20','15:00']],
+    C: [['2026-06-12','21:00'],['2026-06-13','00:00'],['2026-06-16','18:00'],['2026-06-16','21:00'],['2026-06-20','18:00'],['2026-06-20','18:00']],
+    D: [['2026-06-12','21:00'],['2026-06-13','00:00'],['2026-06-17','15:00'],['2026-06-17','18:00'],['2026-06-21','15:00'],['2026-06-21','15:00']],
+    E: [['2026-06-13','15:00'],['2026-06-13','18:00'],['2026-06-17','21:00'],['2026-06-18','00:00'],['2026-06-21','18:00'],['2026-06-21','18:00']],
+    F: [['2026-06-13','21:00'],['2026-06-14','00:00'],['2026-06-18','15:00'],['2026-06-18','18:00'],['2026-06-22','15:00'],['2026-06-22','15:00']],
+    G: [['2026-06-14','15:00'],['2026-06-14','18:00'],['2026-06-18','21:00'],['2026-06-19','00:00'],['2026-06-22','18:00'],['2026-06-22','18:00']],
+    H: [['2026-06-14','21:00'],['2026-06-15','00:00'],['2026-06-19','15:00'],['2026-06-19','18:00'],['2026-06-23','15:00'],['2026-06-23','15:00']],
+    I: [['2026-06-15','15:00'],['2026-06-15','18:00'],['2026-06-19','21:00'],['2026-06-20','00:00'],['2026-06-23','18:00'],['2026-06-23','18:00']],
+    J: [['2026-06-15','21:00'],['2026-06-16','00:00'],['2026-06-20','15:00'],['2026-06-20','18:00'],['2026-06-24','15:00'],['2026-06-24','15:00']],
+    K: [['2026-06-16','15:00'],['2026-06-16','18:00'],['2026-06-20','21:00'],['2026-06-21','00:00'],['2026-06-24','18:00'],['2026-06-24','18:00']],
+    L: [['2026-06-16','21:00'],['2026-06-17','00:00'],['2026-06-21','15:00'],['2026-06-21','18:00'],['2026-06-25','15:00'],['2026-06-25','15:00']],
+  };
+
+  let id = 1;
+  for (const [gk, gd] of Object.entries(GROUPS)) {
+    const slots = schedule[gk];
+    for (let p = 0; p < 6; p++) {
+      const [i,j] = pairs[p];
+      const [dateStr, timeStr] = slots[p];
+      // Build EST ISO string (EST = UTC-5, EDT = UTC-4; June = EDT)
+      const kickoffEST = new Date(`${dateStr}T${timeStr}:00-04:00`);
+      matches.push({
+        id: id++,
+        group: gk,
+        team1: gd.teams[i], flag1: gd.flags[i],
+        team2: gd.teams[j], flag2: gd.flags[j],
+        dateStr, timeStr,           // for display
+        kickoffEST,                 // Date object for lock logic
+        score1: null, score2: null,
+        winner: null,
+        status: 'upcoming'
+      });
+    }
+  }
+  return matches;
+}
+
+// Returns true if kickoff time has passed → picks locked
+function isLocked(m) {
+  if (m.status === 'completed') return true;
+  return Date.now() >= m.kickoffEST.getTime();
+}
+
+// Human-readable kickoff label
+function kickoffLabel(m) {
+  const opts = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York', timeZoneName: 'short' };
+  return m.kickoffEST.toLocaleString('en-US', opts);
+}
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  matches: buildGroupMatches(),
+  participants: [
+    { id: 'p1', name: 'Prasenjit', pin: '' },
+    { id: 'p2', name: 'Arjun',     pin: '' },
+    { id: 'p3', name: 'Sofia',     pin: '' },
+    { id: 'p4', name: 'Marcus',    pin: '' },
+  ],
+  picks: {},       // picks[participantId][matchId] = 'team' | 'DRAW'
+  auditLog: [],    // array of log entry objects, newest first
+  adminUnlocked: false,
+  currentPicksGroup: 'ALL',
+  currentAdminGroup: 'A',
+};
+
+function loadState() {
+  const saved = localStorage.getItem('wc2026_fantasy_state');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      state.participants = parsed.participants || state.participants;
+      state.picks = parsed.picks || {};
+      state.auditLog = parsed.auditLog || [];
+      if (parsed.matches) {
+        for (const pm of parsed.matches) {
+          const m = state.matches.find(x => x.id === pm.id);
+          if (m) {
+            m.score1 = pm.score1; m.score2 = pm.score2;
+            m.winner = pm.winner; m.status = pm.status;
+          }
+        }
+      }
+    } catch(e) {}
+  }
+}
+function saveState() {
+  localStorage.setItem('wc2026_fantasy_state', JSON.stringify({
+    participants: state.participants,
+    picks: state.picks,
+    auditLog: state.auditLog.slice(0, 500), // keep last 500 entries
+    matches: state.matches.map(m => ({ id: m.id, score1: m.score1, score2: m.score2, winner: m.winner, status: m.status }))
+  }));
+}
+
+// ═══════════════════════════════════════════
+//  AUDIT LOG
+// ═══════════════════════════════════════════
+function addLog(type, actor, message, meta = {}) {
+  const entry = {
+    id: Date.now() + Math.random(),
+    type,       // 'pick' | 'change' | 'result' | 'admin' | 'rename' | 'remove'
+    actor,      // player name or 'Admin'
+    message,    // human-readable string (may use ~~del~~ or **bold** markers)
+    meta,       // extra data: matchId, group, team, etc.
+    ts: new Date().toISOString(),
+  };
+  state.auditLog.unshift(entry); // newest first
+}
+
+// ═══════════════════════════════════════════
+//  SCORING
+// ═══════════════════════════════════════════
+function getParticipantScore(pid) {
+  const picks = state.picks[pid] || {};
+  let pts = 0, correct = 0, total = 0;
+  for (const m of state.matches) {
+    if (picks[m.id] !== undefined) {
+      total++;
+      if (m.status === 'completed' && picks[m.id] === m.winner) {
+        pts += 2; correct++;
+      }
+    }
+  }
+  return { pts, correct, total };
+}
+
+function getLeaderboard() {
+  return state.participants
+    .map(p => ({ ...p, ...getParticipantScore(p.id) }))
+    .sort((a,b) => b.pts - a.pts || b.correct - a.correct);
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => {
+    if (b.textContent.toLowerCase().includes(name.slice(0,4))) b.classList.add('active');
+  });
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'picks') renderPicksPage();
+  if (name === 'admin') renderAdminPage();
+  if (name === 'history') renderHistoryPage();
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  const completed = state.matches.filter(m => m.status === 'completed').length;
+  const total = state.matches.length;
+  const lb = getLeaderboard();
+
+  // Stats
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="label">Total Matches</div><div class="value">${total}</div><div class="sub">104 across all rounds</div></div>
+    <div class="stat-card"><div class="label">Completed</div><div class="value" style="color:var(--green)">${completed}</div><div class="sub">${total-completed} remaining</div></div>
+    <div class="stat-card"><div class="label">Participants</div><div class="value" style="color:var(--blue)">${state.participants.length}</div><div class="sub">Active pickers</div></div>
+    <div class="stat-card"><div class="label">Top Score</div><div class="value">${lb[0]?.pts ?? 0}</div><div class="sub">${lb[0]?.name ?? '—'}</div></div>
+    <div class="stat-card"><div class="label">Groups</div><div class="value" style="color:var(--gold)">12</div><div class="sub">A through L</div></div>
+  `;
+
+  // Leaderboard
+  const ranks = ['r1','r2','r3'];
+  const tops = ['top1','top2','top3'];
+  document.getElementById('leaderboard-body').innerHTML = lb.length ? lb.map((p, i) => `
+    <div class="lb-row ${tops[i]||''}">
+      <div class="rank ${ranks[i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="player-name">${p.name}</div>
+      <div class="pts">${p.pts}</div>
+      <div class="lb-correct">${p.correct} ✓</div>
+      <div class="lb-total">${p.total} picks</div>
+    </div>
+  `).join('') : '<div class="empty-state"><div class="emoji">👥</div>No participants yet</div>';
+
+  // Recent results
+  const recent = state.matches.filter(m => m.status === 'completed').slice(-6).reverse();
+  document.getElementById('recent-results').innerHTML = recent.length ? recent.map(m => resultCard(m)).join('')
+    : '<div class="empty-state"><div class="emoji">⏳</div>No results yet<br>Admin sets match outcomes</div>';
+
+  // All matches grid
+  document.getElementById('all-matches-grid').innerHTML = state.matches.map(m => bigMatchCard(m)).join('');
+}
+
+function resultCard(m) {
+  const w = m.winner;
+  const t1won = w === m.team1, t2won = w === m.team2, draw = w === 'DRAW';
+  return `<div class="match-card" style="margin-bottom:0">
+    <div class="match-card-head">
+      <span>Group ${m.group} · ${m.date}</span>
+      <span class="status completed">FT</span>
+    </div>
+    <div class="match-teams">
+      <div class="team-side">
+        <span class="team-flag">${m.flag1}</span>
+        <div class="team-name ${t1won?'winner':''}">${m.team1}</div>
+      </div>
+      <div class="score-box">
+        <div class="score">${m.score1 ?? '-'} – ${m.score2 ?? '-'}</div>
+        <div class="score-label">${draw?'Draw':w}</div>
+      </div>
+      <div class="team-side">
+        <span class="team-flag">${m.flag2}</span>
+        <div class="team-name ${t2won?'winner':''}">${m.team2}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bigMatchCard(m) {
+  const t1won = m.winner === m.team1, t2won = m.winner === m.team2, draw = m.winner === 'DRAW';
+  const locked = isLocked(m);
+
+  // Per-player picks
+  const playerPicks = state.participants.map(p => ({
+    name: p.name,
+    pick: (state.picks[p.id] || {})[m.id] ?? null
+  }));
+
+  // Aggregate counts
+  let p1 = 0, p2 = 0, pd = 0, pNone = 0;
+  for (const { pick } of playerPicks) {
+    if (pick === m.team1) p1++;
+    else if (pick === m.team2) p2++;
+    else if (pick === 'DRAW') pd++;
+    else pNone++;
+  }
+  const correct = m.status === 'completed'
+    ? playerPicks.filter(x => x.pick === m.winner).length : 0;
+
+  const statusCls = m.status === 'completed' ? 'completed' : locked ? 'live' : 'upcoming';
+  const statusLbl = m.status === 'completed' ? 'FT' : locked ? 'LOCKED' : 'Open';
+
+  // Kickoff line
+  const kickoffLine = `<span style="font-family:'Barlow Condensed';font-size:0.7rem;color:var(--muted);letter-spacing:0.5px">⏰ ${kickoffLabel(m)}</span>`;
+
+  // Per-player pick tags
+  const pickTags = playerPicks.map(({ name, pick }) => {
+    if (!pick) return `<span style="background:rgba(107,114,128,0.15);border:1px solid rgba(107,114,128,0.2);border-radius:20px;padding:2px 9px;font-size:0.7rem;color:var(--muted);font-family:'Barlow Condensed';letter-spacing:0.5px">${name}: —</span>`;
+    const isT1 = pick === m.team1, isDraw = pick === 'DRAW';
+    const isCorrect = m.status === 'completed' && pick === m.winner;
+    const isWrong   = m.status === 'completed' && pick !== m.winner;
+    const col = isCorrect ? 'var(--green)' : isWrong ? 'var(--red)' : isT1 ? 'var(--gold)' : isDraw ? 'var(--blue)' : '#f97316';
+    const bg  = isCorrect ? 'rgba(34,197,94,0.12)' : isWrong ? 'rgba(230,57,70,0.1)' : isT1 ? 'rgba(245,183,49,0.1)' : isDraw ? 'rgba(59,130,246,0.1)' : 'rgba(249,115,22,0.1)';
+    const flag = pick === m.team1 ? m.flag1 : pick === m.team2 ? m.flag2 : '🤝';
+    const suffix = isCorrect ? ' ✓' : isWrong ? ' ✗' : '';
+    return `<span style="background:${bg};border:1px solid ${col}33;border-radius:20px;padding:2px 9px;font-size:0.7rem;color:${col};font-family:'Barlow Condensed';font-weight:600;letter-spacing:0.5px;white-space:nowrap">${name}: ${flag} ${pick === 'DRAW' ? 'Draw' : pick}${suffix}</span>`;
+  }).join('');
+
+  return `<div class="match-card">
+    <div class="match-card-head" style="flex-direction:column;align-items:flex-start;gap:4px;padding:10px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+        <span>Group ${m.group}</span>
+        <span class="status ${statusCls}">${statusLbl}</span>
+      </div>
+      ${kickoffLine}
+    </div>
+    <div class="match-teams">
+      <div class="team-side">
+        <span class="team-flag">${m.flag1}</span>
+        <div class="team-name ${t1won?'winner':''}">${m.team1}</div>
+      </div>
+      <div class="score-box">
+        <div class="score">${m.status==='completed'?(m.score1+' – '+m.score2):(locked?'🔒':'v')}</div>
+        <div class="score-label">${m.status==='completed'?(draw?'Draw':m.winner):locked?'In Progress':'Upcoming'}</div>
+      </div>
+      <div class="team-side">
+        <span class="team-flag">${m.flag2}</span>
+        <div class="team-name ${t2won?'winner':''}">${m.team2}</div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:5px">
+      ${playerPicks.length ? pickTags : '<span style="font-size:0.75rem;color:var(--muted);font-family:\'Barlow Condensed\'">No picks yet</span>'}
+    </div>
+    <div class="match-picks-count">
+      <span class="pick-stat"><span class="pick-dot" style="background:var(--gold)"></span>${m.team1}: ${p1}</span>
+      <span class="pick-stat"><span class="pick-dot" style="background:var(--blue)"></span>Draw: ${pd}</span>
+      <span class="pick-stat"><span class="pick-dot" style="background:#f97316"></span>${m.team2}: ${p2}</span>
+      ${pNone ? `<span class="pick-stat"><span class="pick-dot" style="background:var(--muted)"></span>No pick: ${pNone}</span>` : ''}
+      ${m.status==='completed'?`<span class="pick-stat"><span class="pick-dot green"></span>${correct} correct</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  PIN LOGIN & SESSION
+// ═══════════════════════════════════════════
+let session = { pid: null }; // active logged-in player
+let pinBuffer = '';
+let pinTargetPid = null;
+
+function openPinModal() {
+  pinBuffer = '';
+  pinTargetPid = null;
+  document.getElementById('pin-step-select').style.display = 'block';
+  document.getElementById('pin-step-enter').style.display = 'none';
+  document.getElementById('pin-modal-sub').textContent = 'Select your name to continue';
+  document.getElementById('pin-error').textContent = '';
+
+  // Populate player list
+  document.getElementById('pin-player-list').innerHTML = state.participants.length
+    ? state.participants.map(p => `
+        <div class="player-select-item ${!p.pin ? 'no-pin' : ''}" onclick="${p.pin ? `pinSelectPlayer('${p.id}')` : ''}">
+          <span class="pname">${p.name}</span>
+          <span class="ppin-hint">${p.pin ? '🔑 PIN set' : '⚠ No PIN — ask admin'}</span>
+        </div>`)
+      .join('')
+    : '<div style="text-align:center;color:var(--muted);padding:1rem;font-family:\'Barlow Condensed\'">No players yet — admin must add players first</div>';
+
+  document.getElementById('pin-modal').style.display = 'flex';
+}
+
+function closePinModal() {
+  document.getElementById('pin-modal').style.display = 'none';
+  pinBuffer = '';
+  pinTargetPid = null;
+}
+
+function pinSelectPlayer(pid) {
+  pinTargetPid = pid;
+  pinBuffer = '';
+  const p = state.participants.find(x => x.id === pid);
+  document.getElementById('pin-selected-name').textContent = p.name;
+  document.getElementById('pin-modal-sub').textContent = 'Enter your 4-digit PIN';
+  document.getElementById('pin-step-select').style.display = 'none';
+  document.getElementById('pin-step-enter').style.display = 'block';
+  document.getElementById('pin-error').textContent = '';
+  updatePinDots();
+}
+
+function pinKey(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if (pinBuffer.length === 4) setTimeout(submitPin, 120);
+}
+
+function pinClear() {
+  if (!pinBuffer.length) return;
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+}
+
+function pinBack() {
+  pinBuffer = '';
+  document.getElementById('pin-step-enter').style.display = 'none';
+  document.getElementById('pin-step-select').style.display = 'block';
+  document.getElementById('pin-modal-sub').textContent = 'Select your name to continue';
+  pinTargetPid = null;
+}
+
+function updatePinDots(error = false) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('pd' + i);
+    dot.className = 'pin-dot';
+    if (error) dot.classList.add('error');
+    else if (i < pinBuffer.length) dot.classList.add('filled');
+  }
+}
+
+function submitPin() {
+  const p = state.participants.find(x => x.id === pinTargetPid);
+  if (!p || pinBuffer !== p.pin) {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN — try again';
+    updatePinDots(true);
+    setTimeout(() => {
+      pinBuffer = '';
+      updatePinDots();
+      document.getElementById('pin-error').textContent = '';
+    }, 900);
+    return;
+  }
+  // Success
+  session.pid = p.id;
+  closePinModal();
+  addLog('admin', p.name, `logged in`, { pid: p.id });
+  saveState();
+  updateSessionIndicator();
+  renderPicksPage();
+  toast(`👋 Welcome, ${p.name}!`);
+}
+
+function logoutPlayer() {
+  const p = state.participants.find(x => x.id === session.pid);
+  if (p) addLog('admin', p.name, `logged out`, { pid: p.id });
+  saveState();
+  session.pid = null;
+  currentPicksBuf = {};
+  updateSessionIndicator();
+  renderPicksPage();
+  toast('👋 Logged out');
+}
+
+function updateSessionIndicator() {
+  const el = document.getElementById('session-indicator');
+  if (!session.pid) { el.style.display = 'none'; return; }
+  const p = state.participants.find(x => x.id === session.pid);
+  if (!p) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  el.innerHTML = `<div class="session-bar">
+    <span>👤</span>
+    <span class="sname">${p.name}</span>
+    <button class="slogout" onclick="logoutPlayer()">Log out</button>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  PICKS PAGE
+// ═══════════════════════════════════════════
+let currentPicksBuf = {};
+let currentPicksPid = null; // kept for backward compat with savePicks/renderPicksGrid
+
+function renderPicksPage() {
+  currentPicksPid = session.pid;
+  const loggedIn = !!session.pid;
+  document.getElementById('picks-login-wall').style.display = loggedIn ? 'none' : 'block';
+  document.getElementById('picks-logged-in').style.display = loggedIn ? 'block' : 'none';
+  if (!loggedIn) return;
+
+  const p = state.participants.find(x => x.id === session.pid);
+  const sc = getParticipantScore(session.pid);
+
+  // Player badge
+  document.getElementById('picks-player-badge').innerHTML =
+    `<div style="background:rgba(245,183,49,0.1);border:1px solid rgba(245,183,49,0.3);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:1.4rem">👤</span>
+      <div>
+        <div style="font-family:'Bebas Neue';font-size:1.1rem;color:var(--gold);letter-spacing:1px">${p.name}</div>
+        <div style="font-size:0.75rem;color:var(--muted);font-family:'Barlow Condensed';letter-spacing:0.5px">${sc.pts} pts · ${sc.correct} correct · ${sc.total} picks made</div>
+      </div>
+    </div>`;
+
+  // Sync buf with saved picks (only on first load for this session)
+  if (Object.keys(currentPicksBuf).length === 0) {
+    currentPicksBuf = { ...(state.picks[session.pid] || {}) };
+  }
+
+  // Group tabs
+  document.getElementById('picks-group-tabs').innerHTML =
+    ['ALL', ...Object.keys(GROUPS)].map(g =>
+      `<div class="group-tab ${state.currentPicksGroup === g ? 'active' : ''}" onclick="setPicksGroup('${g}')">${g === 'ALL' ? 'All' : g}</div>`
+    ).join('');
+
+  renderPicksGrid();
+}
+
+function setPicksGroup(g) {
+  state.currentPicksGroup = g;
+  renderPicksPage();
+}
+
+function clearPicksBuf() {
+  currentPicksBuf = { ...(state.picks[session.pid] || {}) };
+  renderPicksGrid();
+  toast('↺ Picks reset to last saved');
+}
+
+function renderPicksGrid() {
+  const filter = state.currentPicksGroup;
+  const matches = filter === 'ALL' ? state.matches : state.matches.filter(m => m.group === filter);
+  const savedPicks = state.picks[currentPicksPid] || {};
+
+  document.getElementById('picks-grid').innerHTML = matches.map(m => {
+    const sel = currentPicksBuf[m.id];
+    const saved = savedPicks[m.id];
+    const completed = m.status === 'completed';
+    const locked = isLocked(m);
+    const t1sel = sel === m.team1, t2sel = sel === m.team2, dsel = sel === 'DRAW';
+    const isSaved = sel === saved;
+    const winnerLbl = completed ? `<span class="pill pill-green">Winner: ${m.winner === 'DRAW' ? 'Draw' : m.winner}</span>` : '';
+    const lockedBadge = (!completed && locked) ? `<span class="pill pill-red">🔒 Locked</span>` : '';
+    const unsavedDot = (!locked && sel && !isSaved)
+      ? `<span style="width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block;margin-left:4px" title="Unsaved change"></span>` : '';
+    const correctBadge = completed && saved && saved === m.winner ? `<span class="pill pill-green" style="margin-left:6px">✓ +2 pts</span>` : '';
+    const wrongBadge = completed && saved && saved !== m.winner ? `<span class="pill pill-red" style="margin-left:6px">✗ 0 pts</span>` : '';
+    const kickoffInfo = `<span style="font-size:0.68rem;color:var(--muted);font-family:'Barlow Condensed'">⏰ ${kickoffLabel(m)}</span>`;
+    return `<div class="pick-card" style="${locked && !completed ? 'opacity:0.75' : ''}">
+      <div class="pick-card-head" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+          <span>Group ${m.group} · ${m.dateStr}</span>
+          <span style="display:flex;align-items:center;gap:5px">${winnerLbl}${lockedBadge}${correctBadge}${wrongBadge}${unsavedDot}</span>
+          <span class="status ${completed ? 'completed' : locked ? 'live' : 'upcoming'}">${completed ? 'Full Time' : locked ? 'Locked' : 'Pick Now'}</span>
+        </div>
+        ${kickoffInfo}
+      </div>
+      <div class="pick-card-body">
+        <button class="team-pick-btn ${t1sel ? 'selected' : ''}" onclick="setPick(${m.id},'${m.team1}')" ${locked ? 'disabled' : ''}>
+          <span class="flag">${m.flag1}</span>
+          <span class="tname">${m.team1}</span>
+        </button>
+        <div class="vs-div">VS</div>
+        <button class="team-pick-btn ${t2sel ? 'selected' : ''}" onclick="setPick(${m.id},'${m.team2}')" ${locked ? 'disabled' : ''}>
+          <span class="flag">${m.flag2}</span>
+          <span class="tname">${m.team2}</span>
+        </button>
+        <button class="draw-btn ${dsel ? 'selected-draw' : ''}" onclick="setPick(${m.id},'DRAW')" ${locked ? 'disabled' : ''}>Draw</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty-state"><div class="emoji">⚽</div>No matches in this group</div>';
+}
+
+function setPick(matchId, pick) {
+  if (!session.pid) { openPinModal(); return; }
+  const m = state.matches.find(x => x.id === matchId);
+  if (m && isLocked(m)) { toast('🔒 Picks are locked — match has started!', false); return; }
+  currentPicksBuf[matchId] = pick;
+  renderPicksGrid();
+}
+
+function savePicks() {
+  if (!session.pid) { openPinModal(); return; }
+  const player = state.participants.find(p => p.id === session.pid);
+  const existingPicks = state.picks[session.pid] || {};
+  const unlockedPicks = {};
+  let lockedCount = 0;
+
+  for (const [mid, pick] of Object.entries(currentPicksBuf)) {
+    const m = state.matches.find(x => x.id === parseInt(mid));
+    if (!m) continue;
+    if (isLocked(m)) { lockedCount++; continue; }
+    const prev = existingPicks[mid];
+    if (prev === undefined) {
+      addLog('pick', player.name,
+        `picked <em>${pick === 'DRAW' ? '🤝 Draw' : (pick === m.team1 ? m.flag1 : m.flag2) + ' ' + pick}</em> for Group ${m.group}: ${m.team1} vs ${m.team2}`,
+        { matchId: m.id, group: m.group, pick });
+    } else if (prev !== pick) {
+      addLog('change', player.name,
+        `changed pick for Group ${m.group}: ${m.team1} vs ${m.team2} — <del>${prev === 'DRAW' ? '🤝 Draw' : prev}</del> → <em>${pick === 'DRAW' ? '🤝 Draw' : pick}</em>`,
+        { matchId: m.id, group: m.group, from: prev, to: pick });
+    }
+    unlockedPicks[mid] = pick;
+  }
+
+  state.picks[session.pid] = { ...existingPicks, ...unlockedPicks };
+  saveState();
+  renderPicksPage();
+  const note = lockedCount > 0 ? ` (${lockedCount} locked match${lockedCount > 1 ? 'es' : ''} skipped)` : '';
+  toast(`✅ Picks saved for ${player.name}!${note}`);
+}
+
+// ═══════════════════════════════════════════
+//  ADMIN
+// ═══════════════════════════════════════════
+function unlockAdmin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === 'wc2026') {
+    state.adminUnlocked = true;
+    document.getElementById('admin-locked').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    renderAdminPage();
+    toast('🔓 Admin panel unlocked!');
+  } else {
+    toast('❌ Wrong password', false);
+  }
+}
+
+function renderAdminPage() {
+  if (!state.adminUnlocked) return;
+
+  // Group tabs
+  document.getElementById('admin-group-tabs').innerHTML =
+    Object.keys(GROUPS).map(g =>
+      `<div class="group-tab ${state.currentAdminGroup===g?'active':''}" onclick="setAdminGroup('${g}')">${g}</div>`
+    ).join('');
+
+  // Matches list
+  const matches = state.matches.filter(m => m.group === state.currentAdminGroup);
+  document.getElementById('admin-matches-list').innerHTML = matches.map(m => {
+    const t1won = m.winner === m.team1, t2won = m.winner === m.team2, draw = m.winner === 'DRAW';
+    return `<div class="admin-match-card">
+      <div class="admin-match-head">
+        <span>Group ${m.group} · Match ${m.id} · ${m.date}</span>
+        <span class="status ${m.status}">${m.status === 'completed' ? 'Full Time' : 'Upcoming'}</span>
+      </div>
+      <div class="admin-match-body">
+        <button class="team-result-btn ${t1won?'winner-set':''}" onclick="setResult(${m.id},'${m.team1}')">
+          <span class="flag">${m.flag1}</span>
+          <span class="tname">${m.team1}</span>
+          <span style="font-size:0.65rem;color:var(--muted);font-family:'Barlow Condensed';letter-spacing:1px">WIN</span>
+        </button>
+        <div class="score-input-row">
+          <input class="score-input" type="number" min="0" max="20" value="${m.score1??''}" id="s1-${m.id}" placeholder="0" />
+          <span class="score-sep">–</span>
+          <input class="score-input" type="number" min="0" max="20" value="${m.score2??''}" id="s2-${m.id}" placeholder="0" />
+        </div>
+        <button class="team-result-btn ${t2won?'winner-set':''}" onclick="setResult(${m.id},'${m.team2}')">
+          <span class="flag">${m.flag2}</span>
+          <span class="tname">${m.team2}</span>
+          <span style="font-size:0.65rem;color:var(--muted);font-family:'Barlow Condensed';letter-spacing:1px">WIN</span>
+        </button>
+        <button class="team-result-btn ${draw?'draw-set':''}" onclick="setResult(${m.id},'DRAW')" style="max-width:80px">
+          <span style="font-size:1.4rem">🤝</span>
+          <span class="tname">Draw</span>
+        </button>
+        <button class="admin-save-btn" onclick="saveResult(${m.id})">Save</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Participants
+  document.getElementById('participants-list').innerHTML = state.participants.length ? `
+    <div style="display:grid;grid-template-columns:44px 1fr 130px 90px auto auto;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border)">
+      <div></div>
+      <div style="font-family:'Barlow Condensed';font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Name</div>
+      <div style="font-family:'Barlow Condensed';font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">New PIN</div>
+      <div style="font-family:'Barlow Condensed';font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center">Score</div>
+      <div></div><div></div>
+    </div>
+    ` + state.participants.map(p => {
+    const sc = getParticipantScore(p.id);
+    const pinSet = p.pin && p.pin.length === 4;
+    return `<div style="display:grid;grid-template-columns:44px 1fr 130px 90px auto auto;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid rgba(42,47,60,0.6)">
+      <div style="text-align:center;font-size:1.1rem">👤</div>
+      <input
+        id="rename-input-${p.id}"
+        value="${p.name}"
+        style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:0.9rem;font-weight:600;width:100%;outline:none;transition:border-color 0.2s"
+        onfocus="this.style.borderColor='var(--gold)'"
+        onblur="this.style.borderColor='var(--border)'"
+        onkeydown="if(event.key==='Enter') renameParticipant('${p.id}')"
+      />
+      <div style="display:flex;align-items:center;gap:6px">
+        <input
+          id="pin-input-${p.id}"
+          type="text" maxlength="4" placeholder="New PIN"
+          style="background:var(--panel2);border:1px solid ${pinSet ? 'var(--green)' : 'var(--red)'};border-radius:6px;padding:5px 8px;color:var(--text);font-family:'Bebas Neue';font-size:1.1rem;letter-spacing:4px;width:80px;text-align:center;outline:none"
+          oninput="this.value=this.value.replace(/\\D/g,'').slice(0,4)"
+          placeholder="${pinSet ? '••••' : 'SET!'}"
+        />
+      </div>
+      <div style="font-family:'Bebas Neue';font-size:1.3rem;color:var(--gold);text-align:center">${sc.pts}</div>
+      <button
+        onclick="saveParticipantChanges('${p.id}')"
+        style="background:rgba(245,183,49,0.1);border:1px solid rgba(245,183,49,0.3);color:var(--gold);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:0.72rem;font-family:'Barlow Condensed';font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap"
+      >💾 Save</button>
+      <button
+        onclick="removeParticipant('${p.id}')"
+        style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);color:var(--red);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:0.72rem;font-family:'Barlow Condensed';font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap"
+      >🗑 Remove</button>
+    </div>`;
+  }).join('') : '<div class="empty-state">No participants yet</div>';
+}
+
+function setAdminGroup(g) {
+  state.currentAdminGroup = g;
+  renderAdminPage();
+}
+
+const pendingResults = {};
+
+function setResult(matchId, winner) {
+  if (!pendingResults[matchId]) pendingResults[matchId] = {};
+  pendingResults[matchId].winner = winner;
+  renderAdminPage();
+  // Also visually mark
+  const m = state.matches.find(x => x.id === matchId);
+  if (m) m._pendingWinner = winner;
+}
+
+function saveResult(matchId) {
+  const m = state.matches.find(x => x.id === matchId);
+  if (!m) return;
+  const s1 = document.getElementById('s1-'+matchId)?.value;
+  const s2 = document.getElementById('s2-'+matchId)?.value;
+  const winner = m._pendingWinner || m.winner;
+  if (!winner) { toast('Please select a winner first!', false); return; }
+  const scoreStr = (s1 !== '' && s2 !== '') ? `${s1}–${s2}` : 'no score';
+  const prevWinner = m.winner;
+  m.score1 = s1 !== '' ? parseInt(s1) : null;
+  m.score2 = s2 !== '' ? parseInt(s2) : null;
+  m.winner = winner;
+  m.status = 'completed';
+  delete m._pendingWinner;
+
+  if (prevWinner && prevWinner !== winner) {
+    addLog('result', 'Admin',
+      `corrected result for Group ${m.group}: <em>${m.team1} vs ${m.team2}</em> — <del>${prevWinner}</del> → <em>${winner === 'DRAW' ? '🤝 Draw' : winner}</em> (${scoreStr})`,
+      { matchId, group: m.group, winner, score: scoreStr });
+  } else {
+    addLog('result', 'Admin',
+      `set result for Group ${m.group}: <em>${m.team1} vs ${m.team2}</em> → <em>${winner === 'DRAW' ? '🤝 Draw' : winner}</em> (${scoreStr})`,
+      { matchId, group: m.group, winner, score: scoreStr });
+  }
+
+  saveState();
+  toast(`✅ Result saved: ${m.team1} vs ${m.team2} → ${winner}`);
+  renderAdminPage();
+}
+
+function saveParticipantChanges(pid) {
+  const nameInput = document.getElementById('rename-input-' + pid);
+  const pinInput  = document.getElementById('pin-input-' + pid);
+  const newName = nameInput?.value.trim();
+  const newPin  = pinInput?.value.trim();
+
+  if (!newName) { toast('Name cannot be empty!', false); return; }
+  const p = state.participants.find(x => x.id === pid);
+  if (!p) return;
+
+  let changed = [];
+
+  // Name change
+  if (newName !== p.name) {
+    const dup = state.participants.find(x => x.id !== pid && x.name.toLowerCase() === newName.toLowerCase());
+    if (dup) { toast(`"${newName}" already exists!`, false); return; }
+    addLog('rename', 'Admin', `renamed participant <del>${p.name}</del> → <em>${newName}</em>`, { pid, oldName: p.name, newName });
+    p.name = newName;
+    changed.push('name');
+  }
+
+  // PIN change
+  if (newPin) {
+    if (newPin.length !== 4) { toast('PIN must be exactly 4 digits!', false); return; }
+    const hadPin = !!p.pin;
+    addLog('admin', 'Admin', `${hadPin ? 'reset' : 'set'} PIN for <em>${p.name}</em>`, { pid });
+    p.pin = newPin;
+    changed.push('PIN');
+    if (pinInput) pinInput.value = '';
+  }
+
+  if (!changed.length) { toast('Nothing changed', false); return; }
+
+  if (session.pid === pid) updateSessionIndicator();
+  saveState();
+  renderAdminPage();
+  toast(`✅ Saved: ${changed.join(' & ')} updated for ${p.name}`);
+}
+
+function addParticipant() {
+  const n   = document.getElementById('new-participant-name').value.trim();
+  const pin = document.getElementById('new-participant-pin').value.trim();
+  if (!n) { toast('Name is required!', false); return; }
+  if (!pin || pin.length !== 4) { toast('Please set a 4-digit PIN!', false); return; }
+  if (state.participants.find(p => p.name.toLowerCase() === n.toLowerCase())) {
+    toast('Participant already exists!', false); return;
+  }
+  const pid = 'p' + Date.now();
+  state.participants.push({ id: pid, name: n, pin });
+  addLog('admin', 'Admin', `added new participant <em>${n}</em> with PIN`, { pid, name: n });
+  document.getElementById('new-participant-name').value = '';
+  document.getElementById('new-participant-pin').value = '';
+  saveState();
+  renderAdminPage();
+  toast(`✅ ${n} added with PIN!`);
+}
+
+function removeParticipant(pid) {
+  const p = state.participants.find(x => x.id === pid);
+  if (!p) return;
+  addLog('remove', 'Admin', `removed participant <em>${p.name}</em> and all their picks`, { pid, name: p.name });
+  state.participants = state.participants.filter(x => x.id !== pid);
+  delete state.picks[pid];
+  if (currentPicksPid === pid) { currentPicksPid = null; currentPicksBuf = {}; }
+  saveState();
+  renderAdminPage();
+  toast(`🗑 ${p.name} removed`);
+}
+
+// ═══════════════════════════════════════════
+//  HISTORY PAGE
+// ═══════════════════════════════════════════
+let activeLogFilter = 'ALL';
+
+function setLogFilter(type, btn) {
+  activeLogFilter = type;
+  document.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistoryPage();
+}
+
+function clearHistory() {
+  state.auditLog = [];
+  saveState();
+  renderHistoryPage();
+  toast('🗑 History cleared');
+}
+
+function fmtTs(isoStr) {
+  const d = new Date(isoStr);
+  const date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return `${date}<br>${time}`;
+}
+
+function renderHistoryPage() {
+  const log = state.auditLog;
+  const search = (document.getElementById('log-search-input')?.value || '').toLowerCase();
+
+  // Stats bar
+  const counts = { pick: 0, change: 0, result: 0, admin: 0, rename: 0, remove: 0 };
+  for (const e of log) if (counts[e.type] !== undefined) counts[e.type]++;
+  document.getElementById('history-stats').innerHTML = `
+    <div class="log-stat"><div class="v" style="color:var(--gold)">${log.length}</div><div class="l">Total Events</div></div>
+    <div class="log-stat"><div class="v" style="color:var(--gold)">${counts.pick}</div><div class="l">New Picks</div></div>
+    <div class="log-stat"><div class="v" style="color:#f97316">${counts.change}</div><div class="l">Changes</div></div>
+    <div class="log-stat"><div class="v" style="color:var(--green)">${counts.result}</div><div class="l">Results Set</div></div>
+    <div class="log-stat"><div class="v" style="color:#a78bfa">${counts.admin}</div><div class="l">Admin Actions</div></div>
+    <div class="log-stat"><div class="v" style="color:var(--blue)">${counts.rename}</div><div class="l">Renames</div></div>
+    <div class="log-stat"><div class="v" style="color:var(--red)">${counts.remove}</div><div class="l">Removals</div></div>
+  `;
+
+  // Badge map
+  const badgeMap = {
+    pick:   ['lb-pick',   '🎯 New Pick'],
+    change: ['lb-change', '✏️ Changed'],
+    result: ['lb-result', '⚽ Result'],
+    admin:  ['lb-admin',  '⚙️ Admin'],
+    rename: ['lb-rename', '👤 Renamed'],
+    remove: ['lb-remove', '🗑 Removed'],
+  };
+
+  // Filter
+  let filtered = log;
+  if (activeLogFilter !== 'ALL') filtered = filtered.filter(e => e.type === activeLogFilter);
+  if (search) filtered = filtered.filter(e =>
+    e.actor.toLowerCase().includes(search) ||
+    e.message.toLowerCase().includes(search) ||
+    (e.meta?.group || '').toLowerCase().includes(search)
+  );
+
+  // Update count badge
+  document.getElementById('history-count-badge').textContent = `${log.length} event${log.length !== 1 ? 's' : ''}`;
+
+  if (!filtered.length) {
+    document.getElementById('history-feed').innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">${log.length === 0 ? '📋' : '🔍'}</div>
+        ${log.length === 0
+          ? 'No activity yet — picks and admin actions will appear here'
+          : 'No events match your filter'}
+      </div>`;
+    return;
+  }
+
+  document.getElementById('history-feed').innerHTML = filtered.map(e => {
+    const [bCls, bLbl] = badgeMap[e.type] || ['lb-admin', e.type];
+    return `<div class="log-entry lt-${e.type}">
+      <div class="log-time">${fmtTs(e.ts)}</div>
+      <div class="log-actor">${e.actor}</div>
+      <div class="log-msg">${e.message}</div>
+      <div class="log-badge ${bCls}">${bLbl}</div>
+    </div>`;
+  }).join('');
+}
+
+
+let toastTimer;
+function toast(msg, success = true) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.borderColor = success ? 'var(--green)' : 'var(--red)';
+  el.style.color = success ? 'var(--green)' : 'var(--red)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════
+loadState();
+updateSessionIndicator();
+renderDashboard();
+</script>
+</body>
+</html>
